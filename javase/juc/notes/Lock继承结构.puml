@@ -1,0 +1,26 @@
+@startuml
+interface Lock
+
+
+interface ReadWriteLock {
+    Lock readLock()
+    Lock writeLock()
+}
+
+class ReentrantReadWriteLock implements ReadWriteLock
+
+class ReentrantLock implements Lock {
+
+}
+
+class WriteLock implements Lock {
+}
+
+class ReadLock implements Lock {
+}
+
+ReentrantReadWriteLock *-- WriteLock
+ReentrantReadWriteLock *-- ReadLock
+ReadWriteLock -left[hidden]-- Lock
+ReentrantLock -right[hidden]-- WriteLock
+@enduml

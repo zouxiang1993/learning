@@ -1,0 +1,41 @@
+@startuml
+
+abstract class Writer {
+    ---
+    // 写一个字符
+    +void write(int c)
+    +{abstract} public void write(char cbuf[], int off, int len)
+    +Writer append(CharSequence csq, int start, int end)
+    +{abstract} public void flush()
+}
+
+class OutputStreamWriter extends Writer{
+    // 将OutputStream转换成Writer
+}
+
+class FileWriter extends OutputStreamWriter{
+    // 写到文件
+}
+
+class StringWriter extends Writer {
+    // 写到一个StringBuffer
+    ---
+    +String toString()
+}
+
+class CharArrayWriter extends Writer{
+    // 写到一个char[]
+    ---
+    +String toString()
+}
+
+class BufferedWriter extends Writer{
+    // 使用缓冲区来提高写性能
+}
+
+class PrintWriter extends Writer {
+    +void print(..)
+    +void println(..)
+}
+
+@enduml

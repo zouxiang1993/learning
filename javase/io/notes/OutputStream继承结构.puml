@@ -1,0 +1,42 @@
+@startuml
+
+abstract class OutputStream{
+    ---
+    // 写一个byte
+    +{abstract} void write(int b)
+    +void write(byte b[], int off, int len)
+    +void flush()
+}
+
+class ByteArrayOutputStream extends OutputStream{
+    // 将数据写到内存中的byte[]中
+}
+
+class FileOutputStream extends OutputStream{
+    // 将数据写到文件中
+}
+
+class FilterOutputStream extends OutputStream{
+
+}
+
+class DataOutputStream extends FilterOutputStream{
+    // 可以写各种基本数据类型
+    ---
+    +void writeBoolean(boolean v)
+    +void writeInt(int v)
+    +void writeDouble(double v)
+    +void writeBytes(String s)
+}
+
+class BufferedOutputStream extends FilterOutputStream{
+    // 使用缓冲区来避免每次发送数据时都进行实际的写操作
+    // 可以使用flush()来清空缓冲区
+}
+
+class PrintStream extends FilterOutputStream{
+    +void print(...)
+    +void println(...)
+}
+
+@enduml

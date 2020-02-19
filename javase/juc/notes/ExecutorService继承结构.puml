@@ -1,0 +1,63 @@
+@startuml
+
+interface Executor {
+    提供了一种将任务的提交与执行解耦的机制
+    (包括线程的使用、调度...)
+    --
+    // 提交一个任务
+    void execute(Runnable command)
+}
+
+interface ExecutorService extends Executor {
+    对Executor生命周期的管理，
+    以及一批submit方法, invokeAll & invokeAny
+    ---
+    // 有序退出。之前提交的任务会执行完，后续提交的任务会被拒绝
+    void shutdown()
+    // 尝试中断正在执行的任务，并且不再执行正在排队的任务
+    // 返回正在排队的任务列表
+    List<Runnable> shutdownNow()
+    boolean isShutdown()
+    boolean isTerminated()
+    boolean awaitTermination(long timeout, TimeUnit unit)
+
+    Future<?> submit(Runnable task)
+    Future<T> submit(Runnable task, T result)
+    Future<T> submit(Callable<T> task)
+
+    List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
+    T invokeAny(Collection<? extends Callable<T>> tasks)
+}
+
+interface ScheduledExecutorService extends ExecutorService {
+    ---
+    // 定时调度一次
+    ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit)
+    ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit)
+    // 按固定周期调用
+    ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit)
+    ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit)
+}
+
+abstract class AbstractExecutorService implements ExecutorService {
+
+}
+
+class ThreadPoolExecutor extends AbstractExecutorService {
+    ---
+    用线程池实现的ExecutorService
+    可以减少创建线程的开销，并提供限制和管理资源的方式。
+    1. 如果 当前线程数 < corePoolSize，那么就新建一个线程来处理请求，即使池中有其他空闲的线程。
+    可以通过prestartCoreThread()来预先创建好corePoolSize个线程
+    2. 如果 corePoolSize < 当前线程数 < maximumPoolSize，那么就使用已有的线程来处理请求。
+    3. 如果等待队列已经满了，会再创建新线程，直到数量到达maximumPoolSize
+    4. 如果再有任务进来，而线程数=maximumPoolSize，且队列已满，则任务会被拒绝。
+    5. 超过corePoolSize部分的线程，如果空闲时间超过getKeepAliveTime()，则会被回收掉
+    ----
+}
+
+class ForkJoinPool extends AbstractExecutorService {
+}
+
+class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements ScheduledExecutorService
+@enduml

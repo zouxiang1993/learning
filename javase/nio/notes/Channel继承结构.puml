@@ -1,0 +1,43 @@
+@startuml
+
+interface Channel {
+    表示对硬件设备、文件、网络套接字
+    或程序组件之类的实体的开放连接，
+    该实体能够执行I/O操作
+    ---
+    +boolean isOpen()
+    +void close()
+}
+
+interface InterruptibleChannel extends Channel{
+    可以异步关闭和中断的通道
+}
+
+abstract class AbstractInterruptibleChannel implements InterruptibleChannel
+
+abstract class SelectableChannel extends AbstractInterruptibleChannel{
+    可以通过一个Selector来实现多路复用的Channel
+    ---
+    +<font color="red"><b> SelectionKey register(Selector sel, int ops)
+    +{abstract} SelectableChannel configureBlocking(boolean block)
+}
+
+interface NetworkChannel extends Channel{
+    网络套接字的通道
+    ---
+    // 将套接字绑定到本机地址
+    +bind(SocketAddress local)
+    +SocketAddress getLocalAddress()
+}
+
+abstract class ServerSocketChannel extends AbstractSelectableChannel implements NetworkChannel
+
+abstract class AbstractSelectableChannel extends SelectableChannel
+
+abstract class SocketChannel extends AbstractSelectableChannel implements NetworkChannel
+
+abstract class FileChannel extends AbstractInterruptibleChannel{
+    文件通道
+}
+
+@enduml

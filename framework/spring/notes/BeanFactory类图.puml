@@ -1,0 +1,60 @@
+@startuml
+
+interface BeanFactory {
+    bean的注册中心
+    ---
+    Object getBean(String name)
+}
+
+interface HierarchicalBeanFactory extends BeanFactory {
+    可继承的
+    --
+    BeanFactory getParentBeanFactory()
+}
+
+interface ListableBeanFactory extends BeanFactory {
+    可以列出容器中所有的bean
+}
+
+interface AutowireCapableBeanFactory extends BeanFactory {
+}
+
+interface SingletonBeanRegistry {
+    单例bean注册器
+}
+
+interface ConfigurableBeanFactory extends HierarchicalBeanFactory, SingletonBeanRegistry {
+    提供对BeanFactory的一些配置方法
+}
+
+interface ConfigurableListableBeanFactory extends ListableBeanFactory, AutowireCapableBeanFactory, ConfigurableBeanFactory
+
+class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory implements ConfigurableListableBeanFactory, BeanDefinitionRegistry
+
+class XmlBeanFactory extends DefaultListableBeanFactory
+
+interface BeanDefinitionRegistry extends AliasRegistry {
+    BeanDefinition注册器
+    --
+}
+
+abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory
+
+abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport implements ConfigurableBeanFactory
+
+abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanRegistry
+
+class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements SingletonBeanRegistry
+
+class SimpleAliasRegistry implements AliasRegistry {
+    ConcurrentHashMap实现
+}
+
+interface AliasRegistry {
+    别名注册器
+}
+
+HierarchicalBeanFactory -[hidden]left-- ListableBeanFactory
+AutowireCapableBeanFactory -[hidden]right-- HierarchicalBeanFactory
+SingletonBeanRegistry -[hidden]left-- HierarchicalBeanFactory
+@enduml

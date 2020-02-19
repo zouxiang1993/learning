@@ -1,0 +1,49 @@
+@startuml
+
+interface Future {
+    表示一个异步计算的结果，提供了一些方法来检查
+    计算是否完成、等待计算完成、获取计算结果、
+    取消计算。
+    ---
+    boolean cancel(boolean mayInterruptIfRunning)
+    boolean isCancelled()
+    boolean isDone()
+    // 阻塞，直到获取到结果
+    V get()
+    V get(long timeout, TimeUnit unit)
+}
+
+interface Runnable {
+    如果一个类的实例方法希望通过一个线程来执行，
+    那么这个类就应该实现Runnable接口
+    ---
+    void run()
+}
+
+interface RunnableFuture extends Runnable, Future {
+    Runnable 与 Future的结合
+    当run方法执行完毕，就可以通过Future来获取结果
+}
+
+interface Delayed {
+    ---
+    long getDelay(TimeUnit unit)
+}
+
+interface ScheduledFuture extends Delayed, Future
+
+interface RunnableScheduledFuture extends RunnableFuture, ScheduledFuture
+
+class FutureTask implements RunnableFuture {
+    表示一个可取消的异步计算，提供了Future的基本实现。
+    可用来包装一个Callable或Runnable
+}
+
+class CompletableFuture implements Future
+
+abstract class ForkJoinTask implements Future
+
+abstract class RecursiveTask extends ForkJoinTask
+
+abstract class CountedCompleter extends ForkJoinTask
+@enduml

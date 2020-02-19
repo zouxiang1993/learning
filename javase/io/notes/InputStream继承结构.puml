@@ -1,0 +1,51 @@
+@startuml
+
+abstract class InputStream{
+    +{abstract} int read()
+    +int read(byte b[], int off, int len)
+    +long skip(long n)
+    +int available()
+}
+
+class ByteArrayInputStream extends InputStream{
+    // 数据源:内存中的一个字节数组
+}
+
+class StringBufferInputStream extends InputStream{
+    // 数据源: 一个字符串
+}
+
+class FileInputStream extends InputStream {
+    // 数据源: 一个文件
+}
+
+class SequenceInputStream extends InputStream{
+    // 将多个InputStream合并成一个
+}
+
+class FilterInputStream extends InputStream{
+    // 装饰器
+}
+
+class DataInputStream extends FilterInputStream{
+    // 可以读取各种基本类型数据以及字符串
+    +boolean readBoolean()
+    +byte readByte()
+    +short readShort()
+    +char readChar()
+    +int readInt()
+    +long readLong()
+    +float readFloat()
+    +double readDouble()
+    +String readUTF()
+}
+
+class BufferedInputStream extends FilterInputStream{
+    ---
+    // 使用一个缓冲区(内存中的byte[])，
+    // 每次read都先尝试从缓冲区中读取
+    // 只有当缓冲区中数据不够时，才会进行底层的实际读操作
+    // 每次尽可能多的读取数据进缓冲区。
+}
+
+@enduml

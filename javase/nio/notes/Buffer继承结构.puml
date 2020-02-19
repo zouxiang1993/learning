@@ -1,0 +1,40 @@
+@startuml
+
+abstract class Buffer {
+    Buffer是一种特定原始数据类型(int,double,byte..)元素的线性有限序列。
+    四个重要属性:
+    capacipy: 最大容量。固定值
+    limit: 第一个不能被读/写的元素的下标
+    position: 下一个读或写操作的位置
+    mark: 用来记录一个位置，后面可以reset
+    不变式: mark <= position <= limit <= capacity
+    ---
+    +Buffer clear()
+    +Buffer flip()
+    +boolean hasRemaining()
+}
+
+abstract class IntBuffer extends Buffer
+
+abstract class DoubleBuffer extends Buffer
+
+abstract class CharBuffer extends Buffer
+
+abstract class ByteBuffer extends Buffer {
+    ---
+    // 顺序读/写
+    +{abstract} byte get()
+    +{abstract} ByteBuffer put(byte b)
+    // 顺序批量读/写
+    +ByteBuffer get(byte[] dst, int offset, int length)
+    +ByteBuffer put(byte[] src, int offset, int length)
+    // 随机读/写
+    +{abstract} byte get(int index)
+    +{abstract} ByteBuffer put(int index, byte b)
+    // 直接缓冲区与非直接缓冲区
+    // allocate() 与 allocateDirect()
+    +{abstract} <font color="red"><b>boolean isDirect()
+}
+
+abstract class MappedByteBuffer extends ByteBuffer
+@enduml

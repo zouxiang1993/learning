@@ -1,0 +1,39 @@
+@startuml
+
+abstract class Reader{
+    // 读一个字符
+    +int read()
+    +{abstract} int read(char cbuf[], int off, int len)
+    +long skip(long n)
+}
+
+class InputStreamReader extends Reader{
+    // 将InputStream转换成Reader
+}
+
+class FileReader extends InputStreamReader {
+    // 数据源是文件
+}
+
+class StringReader extends Reader {
+    // 数据源是一个字符串
+}
+
+class CharArrayReader extends Reader{
+    // 数据源是一个char[]
+}
+
+abstract class FilterReader extends Reader{
+}
+
+class BufferedReader extends Reader{
+    // 使用缓冲区提升读性能
+    ---
+    +String readLine()
+}
+
+class LineNumberReader extends BufferedReader{
+    // 记录行号
+}
+
+@enduml

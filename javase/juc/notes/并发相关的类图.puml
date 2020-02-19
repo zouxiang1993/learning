@@ -1,0 +1,58 @@
+@startuml
+
+class Object {
+    ---
+    +void wait()
+    +void wait(long timeout)
+    +void notify()
+    +void notifyAll()
+}
+
+interface Lock {
+    ---
+    +void lock()
+    +void lockInterruptibly()
+    +boolean tryLock()
+    +boolean tryLock(long time, TimeUnit unit)
+    +void unlock()
+    +Condition newCondition()
+}
+
+interface Condition {
+    ---
+     +void await()
+     +void awaitUninterruptibly()
+     +boolean await(long time, TimeUnit unit)
+     +void signal()
+     +void signalAll()
+}
+
+interface Runnable {
+    ---
+    +{abstract} void run()
+}
+
+class Thread implements Runnable{
+    ---
+    // 返回当前线程对象
+    +{static}Thread currentThread()
+    // 休眠
+    +{static}void sleep(long millis)
+    // 启动线程
+    +void start()
+    // 线程执行的内容
+    +void run()
+    // 终止线程(已经弃用)
+    +void stop()
+    // 请求中断线程, 设置中断标志位
+    +void interrupt()
+    // 中断标志是否已经设置
+    +boolean isInterrupted()
+    // 返回中断标志位，并重置为false
+    +{static} boolean interrupted()
+    // 等待线程结束
+    +void join()
+}
+
+Lock "1" -- "n" Condition
+@enduml

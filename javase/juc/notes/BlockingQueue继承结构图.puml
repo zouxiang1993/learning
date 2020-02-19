@@ -1,0 +1,68 @@
+@startuml
+
+interface BlockingQueue {
+    阻塞队列
+    三种操作，三种响应方式。
+    ---
+    // 添加元素；如果已满，则抛异常
+    boolean add(E e)
+    // 添加元素；如果已满，则返回false
+    boolean offer(E e)
+    // 添加元素；如果满，则阻塞
+    void put(E e)
+
+    // 移出并返回头元素；如果空，则抛异常
+    E remove()
+    // 移除并返回头部元素；如果空，则返回null
+    E poll()
+    // 移出并返回头元素；如果空，则阻塞
+    E take()
+
+    // 返回头部元素；如果队列空，则抛异常
+    E element()
+    // 返回头部元素；如果队列空，则返回null
+    E peek()
+}
+
+interface BlockingDeque extends BlockingQueue{
+    双端阻塞队列
+    ---
+    void addFirst(E e)
+    void addLast(E e)
+    ...
+    add,offer,put,take,poll,remove
+    对头和尾的操作
+}
+
+class ArrayBlockingQueue implements BlockingQueue {
+    数组实现
+}
+
+class LinkedBlockingQueue implements BlockingQueue {
+    链表实现
+}
+
+class PriorityBlockingQueue implements BlockingQueue {
+    支持优先级的阻塞队列
+}
+
+class SynchronousQueue implements BlockingQueue {
+    同步队列
+    其中每个put必须等待一个take，反之亦然。
+}
+
+class DelayQueue implements BlockingQueue {
+    延时队列，放入的对象必须实现Delayed接口,
+    只有延时时间过了以后才能取出该对象。
+    比如： 延时1分钟后发送短信
+}
+
+interface TransferQueue extends BlockingQueue{
+}
+
+class LinkedBlockingDeque implements BlockingDeque {
+
+}
+
+class LinkedTransferQueue implements TransferQueue
+@enduml
