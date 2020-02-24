@@ -1,4 +1,5 @@
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 
@@ -26,7 +27,7 @@ public class MappedIO {
     }
 
     private static Tester[] tests = {
-            new Tester("Stream Write") {
+         /*   new Tester("Stream Write") {
                 @Override
                 public void test() throws IOException {
                     DataOutputStream dos = new DataOutputStream(
@@ -54,7 +55,7 @@ public class MappedIO {
                     fc.close();
                     fc = null;
                 }
-            },
+            },*/
             new Tester("Stream Read") {
                 @Override
                 public void test() throws IOException {
@@ -66,6 +67,24 @@ public class MappedIO {
                         dis.readInt();
                     }
                     dis.close();
+                }
+            },
+            new Tester("NIO Read") {
+                @Override
+                public void test() throws IOException {
+                    FileChannel fc = new FileInputStream(
+                            new File("temp.tmp")).getChannel();
+                    ByteBuffer buf = ByteBuffer.allocate(128);
+                    int total = 0;
+                    while (true){
+                        int len = fc.read(buf);
+                        buf.clear();
+                        total += len;
+//                        System.out.println(total);
+                        if (total >= numOfInts*4){
+                            break;
+                        }
+                    }
                 }
             },
             new Tester("Mapped Read") {

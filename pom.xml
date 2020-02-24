@@ -26,5 +26,6 @@
         <module>javase</module>
         <module>netty</module>
         <module>framework</module>
+        <module>components</module>
     </modules>
 </project>
