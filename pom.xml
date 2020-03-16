@@ -9,6 +9,16 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.13</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <build>
         <plugins>
             <plugin>
@@ -22,9 +32,7 @@
         </plugins>
     </build>
     <modules>
-        <module>learning-javase</module>
         <module>javase</module>
-        <module>netty</module>
         <module>framework</module>
         <module>components</module>
     </modules>

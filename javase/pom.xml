@@ -17,6 +17,7 @@
         <module>juc</module>
         <module>design-pattern</module>
         <module>jdbc</module>
+        <module>collections</module>
     </modules>
 
 

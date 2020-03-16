@@ -35,6 +35,7 @@ public class EchoServer {
                         }
                     });
             ChannelFuture f = b.bind().sync();
+            System.out.println(f);
             f.channel().closeFuture().sync();
         } finally {
             group.shutdownGracefully().sync();

@@ -1,0 +1,33 @@
+@startuml
+package java.util.concurrent {
+    interface ScheduledExecutorService extends ExecutorService
+
+    abstract class AbstractExecutorService implements ExecutorService
+}
+
+package io.netty.util.concurrent{
+    interface EventExecutorGroup extends ScheduledExecutorService
+
+    interface EventExecutor extends EventExecutorGroup
+
+    interface OrderedEventExecutor extends EventExecutor
+
+    abstract class AbstractEventExecutor extends AbstractExecutorService implements EventExecutor
+
+    abstract class AbstractScheduledEventExecutor extends AbstractEventExecutor
+
+    abstract class SingleThreadEventExecutor extends AbstractScheduledEventExecutor implements OrderedEventExecutor
+}
+
+package io.netty.channel {
+    interface EventLoopGroup extends EventExecutorGroup
+
+    interface EventLoop extends OrderedEventExecutor, EventLoopGroup
+
+    abstract class SingleThreadEventLoop extends SingleThreadEventExecutor implements EventLoop
+}
+
+SingleThreadEventLoop -[hidden]right-- SingleThreadEventExecutor
+EventLoopGroup -[hidden]right-- EventExecutor
+
+@enduml

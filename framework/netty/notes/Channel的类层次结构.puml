@@ -1,0 +1,36 @@
+@startuml
+
+interface Channel extends AttributeMap, ChannelOutboundInvoker
+
+interface ServerChannel extends Channel
+
+abstract class AbstractChannel implements Channel
+
+interface DuplexChannel extends Channel
+
+interface SocketChannel extends DuplexChannel
+
+class NioSocketChannel extends AbstractNioByteChannel implements SocketChannel
+
+interface ServerSocketChannel extends ServerChannel
+
+class OioServerSocketChannel implements ServerSocketChannel
+
+class NioServerSocketChannel implements ServerSocketChannel
+
+abstract class AbstractNioChannel extends AbstractChannel
+
+abstract class AbstractNioByteChannel extends AbstractNioChannel
+
+abstract class AbstractOioChannel extends AbstractChannel
+
+abstract class AbstractOioByteChannel extends AbstractOioChannel
+
+abstract class OioByteStreamChannel extends AbstractOioByteChannel
+
+class OioSocketChannel extends OioByteStreamChannel implements SocketChannel
+
+ServerChannel -[hidden]right-- AbstractChannel
+AbstractChannel -[hidden]right-- DuplexChannel
+ServerSocketChannel -[hidden]right-- SocketChannel
+@enduml
