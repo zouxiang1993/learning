@@ -6,29 +6,25 @@ interface ServerChannel extends Channel
 
 abstract class AbstractChannel implements Channel
 
-interface DuplexChannel extends Channel
+interface DuplexChannel extends Channel {
+    双工的通道, 输入/输出可单独的关闭。
+}
 
-interface SocketChannel extends DuplexChannel
+interface SocketChannel extends DuplexChannel {
+    TCP/IP 通道
+}
 
 class NioSocketChannel extends AbstractNioByteChannel implements SocketChannel
 
-interface ServerSocketChannel extends ServerChannel
-
-class OioServerSocketChannel implements ServerSocketChannel
+interface ServerSocketChannel extends ServerChannel {
+    TCP/IP 的监听通道。
+}
 
 class NioServerSocketChannel implements ServerSocketChannel
 
 abstract class AbstractNioChannel extends AbstractChannel
 
 abstract class AbstractNioByteChannel extends AbstractNioChannel
-
-abstract class AbstractOioChannel extends AbstractChannel
-
-abstract class AbstractOioByteChannel extends AbstractOioChannel
-
-abstract class OioByteStreamChannel extends AbstractOioByteChannel
-
-class OioSocketChannel extends OioByteStreamChannel implements SocketChannel
 
 ServerChannel -[hidden]right-- AbstractChannel
 AbstractChannel -[hidden]right-- DuplexChannel

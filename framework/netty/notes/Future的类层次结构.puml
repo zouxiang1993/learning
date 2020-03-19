@@ -1,0 +1,25 @@
+@startuml
+
+interface Future extends java.util.concurrent.Future{
+    +addListener()
+    +sync()
+    +await()
+}
+
+interface Promise extends Future {
+    提供对Future的写操作
+    ---
+    +setSuccess(V result)
+    +setFailure(Throwable cause)
+}
+
+interface ChannelFuture extends Future
+
+interface ChannelPromise extends ChannelFuture, Promise
+
+class DefaultChannelPromise extends DefaultPromise implements ChannelPromise
+
+class DefaultPromise extends AbstractFuture implements Promise
+
+abstract class AbstractFuture implements Future
+@enduml
