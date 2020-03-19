@@ -26,6 +26,7 @@ interface RunnableFuture extends Runnable, Future {
 }
 
 interface Delayed {
+    表示一个任务应该在指定的时间之后在运行。
     ---
     long getDelay(TimeUnit unit)
 }

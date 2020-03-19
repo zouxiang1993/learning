@@ -53,11 +53,17 @@ class ThreadPoolExecutor extends AbstractExecutorService {
     3. 如果等待队列已经满了，会再创建新线程，直到数量到达maximumPoolSize
     4. 如果再有任务进来，而线程数=maximumPoolSize，且队列已满，则任务会被拒绝。
     5. 超过corePoolSize部分的线程，如果空闲时间超过getKeepAliveTime()，则会被回收掉
+    6. 如果一个线程异常退出，会自动补充一个新的：见processWorkerExit()
     ----
 }
 
 class ForkJoinPool extends AbstractExecutorService {
 }
 
-class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements ScheduledExecutorService
+class ScheduledThreadPoolExecutor extends ThreadPoolExecutor implements ScheduledExecutorService {
+工作原理：
+依赖一个特殊实现的优先级队列。队列中存放的元素为ScheduledFutureTask，实现了Delay接口，
+该队列将所有ScheduledFutureTask按执行时间排序。工作线程每一次试图从队列中取出任务时，都会取出期望最早运行的那个。
+此类只保证每个任务不会在它被期望执行的时间点之前执行，当这个时间点到达后，对它运行的实时性不做任何保证。
+}
 @enduml
