@@ -1,0 +1,9 @@
+{
+  "请求地址": "{{prefix}}/mall/ios/spu/search",
+  "version": "1.0",
+  "identify": "2345678910JQKA^^",
+  "channelId": "{{place_holder}}",
+  "keyword": "iphone",
+  "sortType": "COMMISSION_DESC",
+  "pageSize": 100
+}

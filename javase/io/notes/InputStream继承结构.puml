@@ -48,4 +48,6 @@ class BufferedInputStream extends FilterInputStream{
     // 每次尽可能多的读取数据进缓冲区。
 }
 
+class SocketInputStream extends FileInputStream {
+}
 @enduml

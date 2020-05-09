@@ -35,5 +35,6 @@
         <module>javase</module>
         <module>framework</module>
         <module>components</module>
+        <module>isearch-test</module>
     </modules>
 </project>

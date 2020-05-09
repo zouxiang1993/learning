@@ -18,6 +18,7 @@
         <module>design-pattern</module>
         <module>jdbc</module>
         <module>collections</module>
+        <module>lang</module>
     </modules>
 
 
