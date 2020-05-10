@@ -1,10 +1,12 @@
+package java并发编程的艺术.ch4_1.线程状态;
+
 /**
  * Description: No Description
  *
  * @author zouxiang
  * @date 2020/5/9
  */
-public class ThreadStateTest3 {
+public class ThreadStateTest_Blocked {
     public static void main(String[] args) throws Exception {
         new Thread(new BlockedThread(), "BlockedThread_1").start();
 
@@ -17,19 +19,12 @@ public class ThreadStateTest3 {
 
     static Object obj = new Object();
 
-    /**
-     * 此时，
-     * BlockedThread_1 --> java.lang.Thread.State: RUNNABLE
-     * BlockedThread_2  --> java.lang.Thread.State: BLOCKED (on object monitor)
-     */
     static class BlockedThread implements Runnable {
-
         @Override
         public void run() {
             synchronized (obj) {
                 // 获取锁后死循环, 不释放
                 while (true) {
-
                 }
             }
         }
