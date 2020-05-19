@@ -36,5 +36,6 @@
         <module>framework</module>
         <module>components</module>
         <module>isearch-test</module>
+        <module>data-structure</module>
     </modules>
 </project>
