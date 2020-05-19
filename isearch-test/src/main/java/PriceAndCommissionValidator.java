@@ -20,10 +20,10 @@ import java.util.Map;
  */
 public class PriceAndCommissionValidator {
 
-    public static final String ISEARCH_PREFIX = "http://localhost:8280";
+    public static final String ISEARCH_PREFIX = "https://ts-napi-uat.weilaijishi.com/api/isearch";
     public static final Map<String, String> ISEARCH_HEADERS;
 
-    public static final String PRODUCT_PREFIX = "https://sm-napi-dev.weilaijishi.com/api/product-restructure/optionauthc/prodetail/product?id=";
+    public static final String PRODUCT_PREFIX = "https://sm-napi-uat.weilaijishi.com/api/product-restructure/optionauthc/prodetail/product?id=";
 
     static {
         ISEARCH_HEADERS = new HashMap<>();
@@ -59,7 +59,7 @@ public class PriceAndCommissionValidator {
         String jsonString = sw.toString();
 
         // 遍历每一个cps渠道，分别校验。
-        for (int channelId = 1; channelId <= 1; channelId++) {
+        for (int channelId = 3; channelId <= 3; channelId++) {
             System.out.println("当前channelId: " + channelId);
             String requestJson = jsonString.replaceAll("\\{\\{place_holder}}", String.valueOf(channelId));
             JSONObject jsonObject = JSONObject.parseObject(requestJson);
@@ -85,7 +85,6 @@ public class PriceAndCommissionValidator {
                 String price = item.getString("price");
                 String commission = item.getString("commission");
 
-
                 HttpClientResult productHttpResult = HttpClientUtils.doGet(PRODUCT_PREFIX + spuCode);
                 String productContent = productHttpResult.getContent();
                 JSONObject productResult = JSONObject.parseObject(productContent).getJSONObject("result");
@@ -99,7 +98,8 @@ public class PriceAndCommissionValidator {
                     // CPS 的规则
                     JSONObject productCps = productResult.getJSONObject("productCps");
                     String productPrice = productCps.getString("price");
-                    String productCommission = productCps.getString("commission");
+                    JSONArray commissionList = productCps.getJSONArray("commissionList");
+                    String productCommission = commissionList.getString(0);
                     String productId = productCps.getString("productId");
                     if (isSameDecimal(price, productPrice) && isSameDecimal(commission, productCommission)) {
 
@@ -120,7 +120,7 @@ public class PriceAndCommissionValidator {
         if (s1 == null) {
             if (s2 == null) {
                 return true;
-            }else {
+            } else {
                 return false;
             }
         }
