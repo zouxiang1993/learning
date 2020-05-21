@@ -63,6 +63,10 @@ public class BinaryTree<E> implements BinaryTreeInfo {
         }
     }
 
+    protected Node<E> createNode(E element, Node<E> parent) {
+        return new Node<>(element, parent);
+    }
+
     protected static class Node<E> {
         E element; // 节点中存储的元素
         Node<E> left; // 左子节点
@@ -87,6 +91,19 @@ public class BinaryTree<E> implements BinaryTreeInfo {
         public boolean hasTwoChildren() {
             return left != null && right != null;
         }
+
+        public boolean isLeftChild() {
+            return parent != null && this == parent.left;
+        }
+
+        public boolean isRightChild() {
+            return parent != null && this == parent.right;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(element);
+        }
     }
 
     @Override
@@ -106,6 +123,6 @@ public class BinaryTree<E> implements BinaryTreeInfo {
 
     @Override
     public Object string(Object node) {
-        return node == null ? "NULL" : ((Node) node).element.toString();
+        return node == null ? "NULL" : node.toString();
     }
 }
