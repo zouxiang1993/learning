@@ -11,14 +11,22 @@ interface Channel {
 
 interface InterruptibleChannel extends Channel{
     可以异步关闭和中断的通道
+    ---
+    // 任何阻塞在该通道上的读写操作都会收到一个AsynchronousCloseException
+    +void close()
 }
 
-abstract class AbstractInterruptibleChannel implements InterruptibleChannel
-
-abstract class SelectableChannel extends AbstractInterruptibleChannel{
+abstract class SelectableChannel extends InterruptibleChannel{
     可以通过一个Selector来实现多路复用的Channel
     ---
+    //
+    +{abstract} int validOps()
+    // 注册到一个Selector上去
     +<font color="red"><b> SelectionKey register(Selector sel, int ops)
+    // 是否已经注册
+    +{abstract} boolean isRegistered()
+
+    // 设置是否阻塞模式
     +{abstract} SelectableChannel configureBlocking(boolean block)
 }
 
@@ -28,16 +36,36 @@ interface NetworkChannel extends Channel{
     // 将套接字绑定到本机地址
     +bind(SocketAddress local)
     +SocketAddress getLocalAddress()
+    +<T> NetworkChannel setOption(SocketOption<T> name, T value)
 }
 
-abstract class ServerSocketChannel extends AbstractSelectableChannel implements NetworkChannel
+abstract class ServerSocketChannel extends SelectableChannel implements NetworkChannel {
+    服务器端Channel, 只有 OP_ACCEPT 事件
+    ---
+    // 注意这个bind方法, 默认backlog是0，底层实现会设置成50 。
+    // 这个值偏小，通常是服务器端可以调优的一个点 （比如说tomcat）
+    +bind(SocketAddress local, int backlog)
+}
 
-abstract class AbstractSelectableChannel extends SelectableChannel
 
-abstract class SocketChannel extends AbstractSelectableChannel implements NetworkChannel
+abstract class SocketChannel extends SelectableChannel implements NetworkChannel {
+    客户端Channel, 有 OP_CONNECT, OP_READ, OP_WRITE 三种事件
+    ---
+}
 
-abstract class FileChannel extends AbstractInterruptibleChannel{
+abstract class FileChannel extends InterruptibleChannel{
     文件通道
+    ---
+    // 设置下一次要操作的位置
+    +{abstract} FileChannel position(long newPosition)
+    +{abstract} void force(boolean metaData)
+    +{abstract} long transferTo(...)
+    +{abstract} long transferFrom(...)
+    // 将文件的某个部分映射到内存
+    +{abstract} MappedByteBuffer map(MapMode mode, long position, long size)
+    // 锁定文件
+    +FileLock lock()
+    +FileLock tryLock()
 }
 
 @enduml
