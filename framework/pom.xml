@@ -18,6 +18,7 @@
         <module>mockito</module>
         <module>httpclient</module>
         <module>dubbo</module>
+        <module>logback</module>
     </modules>
 
 
