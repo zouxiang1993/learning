@@ -42,6 +42,7 @@ public class Builder {
      */
     public DoubleArrayTrie build(List<String> patterns, int values[]) {
         Objects.requireNonNull(patterns);
+        // TODO: 等于0时怎么构造空树？
         if (patterns.size() == 0) {
             return new DoubleArrayTrie(null, null);
         }
@@ -117,7 +118,7 @@ public class Builder {
         }
 
         // 设置最右节点的right属性
-        if (children.size() != 0) {
+        if (!children.isEmpty()) {
             lastOf(children).right = parent.right;
         }
 
@@ -131,6 +132,7 @@ public class Builder {
      * @return 插入位置
      */
     private int insert(List<Node> siblings, BitSet used) {
+        // TODO: 考虑删除掉used参数，用check[pos] ==0 来判断是否被占用？
         int begin = findCheckPos(siblings, used);
         used.set(begin);
 
@@ -139,6 +141,7 @@ public class Builder {
             size = begin + lastOf(siblings).code + 1;
         }
 
+        // 注意这个循环和下面的循环不能合并成一个，因为要先把check[]中的位置占用，再去递归处理子节点
         for (int i = 0; i < siblings.size(); i++) {
             check[begin + siblings.get(i).code] = begin;
         }
@@ -148,7 +151,7 @@ public class Builder {
             if (newChildren.size() > 0) {
                 // 递归处理所有的子节点
                 int h = insert(newChildren, used);
-                base[begin + siblings.get(i).code] = h;
+                base[begin + siblings.get(i).code] = h; // TODO: ???????
             } else {
                 // 如果没有子节点，则说明是一个词的末尾且不为其他词的前缀
                 base[begin + siblings.get(i).code] = (values != null) ?
@@ -163,34 +166,29 @@ public class Builder {
     }
 
     /**
-     * 返回List中的最后一个节点
+     * 找出一个空闲的位置，作为这一批节点的基础偏移量
+     *
+     * @param siblings
+     * @param used
+     * @return
      */
-    private Node lastOf(List<Node> nodes) {
-        return nodes.get(nodes.size() - 1);
-    }
-
     private int findCheckPos(List<Node> siblings, BitSet used) {
-        boolean isFirst = true;
         int pos = Math.max(siblings.get(0).code + 1, nextCheckPos) - 1;
         int nonZeroNum = 0;
 
-        // 一个简单的启发式判断条件：
-        // 如果从nextCheckPos到pos之间的空间已经占用了95%以上，那么再下次插入节点时，直接从pos位置处开始查找。
-        if (1.0 * nonZeroNum / (pos - nextCheckPos + 1) >= 0.95) {
-            nextCheckPos = pos;
-        }
-
+        boolean isFirst = true;
         int begin;
         // 此循环体的目标是找出满足base[begin + a1...an]  == 0的n个空闲空间,a1...an是siblings中的n个节点
         outer:
         while (true) {
             pos++;
+            begin = pos - firstOf(siblings).code; // 当前位置离第一个兄弟节点的距离
 
-            if (check.length <= pos) {
-                ensureSize(pos + 1);
+            if (check.length <= begin + lastOf(siblings).code) {
+                ensureSize(begin + lastOf(siblings).code + Character.MAX_VALUE);
             }
 
-            if (check[pos] != 0) {
+            if (check[pos] != 0) { // 该位置已经被占用
                 nonZeroNum++;
                 continue;
             } else if (isFirst) {
@@ -198,15 +196,12 @@ public class Builder {
                 isFirst = false;
             }
 
-            begin = pos - siblings.get(0).code; // 当前位置离第一个兄弟节点的距离
-            if (check.length <= begin + siblings.get(siblings.size() - 1).code) {
-                ensureSize(begin + siblings.get(siblings.size() - 1).code + Character.MAX_VALUE);
-            }
-
+            // begin位置已经被占用
             if (used.get(begin)) {
                 continue;
             }
 
+            //
             for (int i = 1; i < siblings.size(); i++) {
                 if (check[begin + siblings.get(i).code] != 0) {
                     continue outer;
@@ -215,6 +210,13 @@ public class Builder {
 
             break;
         }
+
+        // 一个简单的启发式判断条件：
+        // 如果从nextCheckPos到pos之间的空间已经占用了95%以上，那么再下次插入节点时，直接从pos位置处开始查找。
+        if (1.0 * nonZeroNum / (pos - nextCheckPos + 1) >= 0.95) {
+            nextCheckPos = pos;
+        }
+
         return begin;
     }
 
@@ -224,10 +226,11 @@ public class Builder {
      * @param newSize
      */
     private void ensureSize(int newSize) {
-        // TODO: 是否可能会存在频繁扩容的情况？是否要限制一下每次扩容的最小值。
-        if (base != null && base.length >= newSize) {
-            return;
+        if (base != null && base.length > newSize) {
+            throw new RuntimeException("新数组长度 < 旧数组长度，请检查是否算术溢出");
         }
+
+        // TODO: 新老数组长度差距不能太小，不然可能很快又要进行下一次扩容。
 
         int[] newBase = new int[newSize];
         int[] newCheck = new int[newSize];
@@ -251,6 +254,20 @@ public class Builder {
         int newCheck[] = new int[size + 65535];
         System.arraycopy(check, 0, newCheck, 0, size);
         check = newCheck;
+    }
+
+    /**
+     * 返回List中的最后一个节点
+     */
+    private Node lastOf(List<Node> nodes) {
+        return nodes.get(nodes.size() - 1);
+    }
+
+    /**
+     * 返回List中的第一个节点
+     */
+    private Node firstOf(List<Node> nodes) {
+        return nodes.get(0);
     }
 
     private static class Node {
