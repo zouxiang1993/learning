@@ -34,6 +34,13 @@ public class Builder {
     private int nextCheckPos;
 
     /**
+     * 取值在[0,1]之间。通常情况下：
+     * 这个值越大时，构造的时间越长，构造出来的双数组越小。(优先考虑内存消耗)
+     * 这个值越小时，构造的时间越短，构造出来的双数组越大。(优先考虑构造时间)
+     */
+    private static final double THRESHOLD = 0.95;
+
+    /**
      * 唯一的构建方法
      *
      * @param patterns 所有的模式串，必须严格按字典序排列
@@ -53,7 +60,8 @@ public class Builder {
         // 给双数组一个初始的大小: 32个双字节
         ensureSize(65536 * 32);
 
-        base[0] = 1;
+        // 由于base[pos]=0表示未占用，所以最少要设置成1
+        base[0] = 1; // TODO: 这个设置要与insert过程的结果对应？
         nextCheckPos = 0;
 
         Node root = new Node();
@@ -77,35 +85,38 @@ public class Builder {
      */
     private List<Node> createAllChildren(Node parent) {
         List<Node> children = new ArrayList<>();
-        int prev = 0;
+        int prevCode = 0;
 
         for (int i = parent.left; i < parent.right; i++) {
             final String pattern = patterns.get(i);
 
+            // 根据pattern.length 和 parent.depth 的比较结果，分三种情况讨论。
+            int currentCode;
             if (pattern.length() < parent.depth) {
-                // 长度太短，不可能是parent的子节点了，直接忽略
+                // 1. pattern长度太短，不可能是parent的子节点了，直接忽略
                 continue;
+            } else if (pattern.length() == parent.depth) {
+                // 2. 到达的模式串的结尾，添加一个code=0的叶子节点
+                currentCode = 0;
+            } else {
+                // 3. 添加一个非叶子节点 (也可能是连续的多个pattern在这个位置上有相同的字符，则合并成一个节点)
+                assert pattern.length() > parent.depth;
+                // 由于code=0专门用于表示叶子节点(即模式串的结束)。因此其他所有的code都必须大于0，所以这里要加1
+                currentCode = (int) pattern.charAt(parent.depth) + 1;
             }
 
-            int cur = 0;
-            if (pattern.length() != parent.depth) {
-                // Q: 为什么要加1？
-                // A: 在树中，code=0专门用来表示一个字符串的结束。因此其他的code都必须大于等于1
-                cur = (int) pattern.charAt(parent.depth) + 1;
-            }
-
-            if (prev > cur) {
+            if (prevCode > currentCode) {
                 throw new RuntimeException(String.format("模式串没有严格的按字典序！[%s] 和 [%s]",
                         patterns.get(i - 1), patterns.get(i)));
             }
 
             // children.size() == 0 表示这是第一次执行
-            // cur != prev 表示发现了这一层中的一个新节点。
+            // currentCode != prevCode 表示发现了这一层中的一个新节点。
             // 这两种情况都要新增一个Node
-            if (cur != prev || children.size() == 0) {
+            if (currentCode != prevCode || children.size() == 0) {
                 Node newNode = new Node();
                 newNode.depth = parent.depth + 1;
-                newNode.code = cur;
+                newNode.code = currentCode;
                 newNode.left = i;
                 // 如果新增的不是第一个节点，那么上一个节点就已经构建完毕，设置一下它的right属性
                 if (children.size() != 0) {
@@ -114,7 +125,7 @@ public class Builder {
                 children.add(newNode);
             }
 
-            prev = cur;
+            prevCode = currentCode;
         }
 
         // 设置最右节点的right属性
@@ -129,51 +140,56 @@ public class Builder {
      * 插入节点
      *
      * @param siblings 一批等待插入的兄弟节点
-     * @return 插入位置
+     * @return siblings的父节点的基础偏移量(base值)
      */
     private int insert(List<Node> siblings, BitSet used) {
         // TODO: 考虑删除掉used参数，用check[pos] ==0 来判断是否被占用？
-        int begin = findCheckPos(siblings, used);
-        used.set(begin);
+        int parentNodeBaseOffset = findCheckPos(siblings, used);
+        used.set(parentNodeBaseOffset);
 
-        // TODO: ...
-        if (size <= begin + lastOf(siblings).code + 1) {
-            size = begin + lastOf(siblings).code + 1;
+        // TODO: size参数是否可以去掉？
+        if (size <= parentNodeBaseOffset + lastOf(siblings).code + 1) {
+            size = parentNodeBaseOffset + lastOf(siblings).code + 1;
         }
 
-        // 注意这个循环和下面的循环不能合并成一个，因为要先把check[]中的位置占用，再去递归处理子节点
+        // 更新check[]。注意: 这个循环和下面的循环不能合并成一个。
+        // 因为后面递归处理子节点时要用check[]来判断节点是否已经被占用，所以要先更新，再递归处理。
         for (int i = 0; i < siblings.size(); i++) {
-            check[begin + siblings.get(i).code] = begin;
+            check[parentNodeBaseOffset + siblings.get(i).code] = parentNodeBaseOffset;
         }
 
         for (int i = 0; i < siblings.size(); i++) {
-            List<Node> newChildren = createAllChildren(siblings.get(i));
-            if (newChildren.size() > 0) {
+            Node currentNode = siblings.get(i);
+            List<Node> children = createAllChildren(currentNode);
+            if (children.size() > 0) {
                 // 递归处理所有的子节点
-                int h = insert(newChildren, used);
-                base[begin + siblings.get(i).code] = h; // TODO: ???????
+                int currentNodeBaseOffset = insert(children, used);
+                // 非叶子节点的base值
+                base[parentNodeBaseOffset + currentNode.code] = currentNodeBaseOffset;
             } else {
-                // 如果没有子节点，则说明是一个词的末尾且不为其他词的前缀
-                base[begin + siblings.get(i).code] = (values != null) ?
-                        (-values[siblings.get(i).left] - 1) : (-siblings.get(i).left - 1);
+                // 叶子节点(一个词的末尾)的base值
+                base[parentNodeBaseOffset + currentNode.code] = (values != null) ?
+                        (-values[currentNode.left] - 1) : (-currentNode.left - 1);
 
-                if (values != null && (-values[siblings.get(i).left] - 1) >= 0) {
+                if (values != null && (-values[currentNode.left] - 1) >= 0) {
                     throw new RuntimeException("errorCode = -2 ???");
                 }
             }
         }
-        return begin;
+        return parentNodeBaseOffset;
     }
 
     /**
-     * 找出一个空闲的位置，作为这一批节点的基础偏移量
+     * 在check[]中找出一个空闲的位置，作为这一批节点的基础偏移量
+     * 即找到一个值offset,使得 check[offset] == 0 ，
+     * 且对于siblings中的每一个节点，都有 base[offset+siblings.get(i).code] == 0
      *
      * @param siblings
      * @param used
      * @return
      */
     private int findCheckPos(List<Node> siblings, BitSet used) {
-        int pos = Math.max(siblings.get(0).code + 1, nextCheckPos) - 1;
+        int pos = Math.max(firstOf(siblings).code + 1, nextCheckPos) - 1;
         int nonZeroNum = 0;
 
         boolean isFirst = true;
@@ -203,6 +219,7 @@ public class Builder {
 
             //
             for (int i = 1; i < siblings.size(); i++) {
+                // TODO: 这里是不是应该改成base数组？？？
                 if (check[begin + siblings.get(i).code] != 0) {
                     continue outer;
                 }
@@ -213,7 +230,7 @@ public class Builder {
 
         // 一个简单的启发式判断条件：
         // 如果从nextCheckPos到pos之间的空间已经占用了95%以上，那么再下次插入节点时，直接从pos位置处开始查找。
-        if (1.0 * nonZeroNum / (pos - nextCheckPos + 1) >= 0.95) {
+        if (1.0 * nonZeroNum / (pos - nextCheckPos + 1) >= THRESHOLD) {
             nextCheckPos = pos;
         }
 

@@ -84,6 +84,28 @@ public class DoubleArrayTrie<V> {
         return result;
     }
 
+    public int myMatchTest(char[] text) {
+        int result = -1;
+
+        int baseOffset = base[0];
+        int nextPos;
+
+        for (int i = 0; i < text.length; i++) {
+            nextPos = baseOffset + (int) (text[i]) + 1;
+            if (baseOffset == check[nextPos])
+                baseOffset = base[nextPos];
+            else
+                return result;
+        }
+
+        nextPos = baseOffset;
+        int n = base[nextPos];
+        if (baseOffset == check[nextPos] && n < 0) {
+            result = -n - 1;
+        }
+        return result;
+    }
+
     public List<Integer> commonPrefixSearch(String key) {
         return commonPrefixSearch(key, 0, 0, 0);
     }
